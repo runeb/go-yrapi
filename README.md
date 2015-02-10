@@ -3,7 +3,7 @@ A toy project for learning Go in a useful way
 
 
 ```bash
-$ go get github.com/davecgh/go-spew/spew
+$ go get github.com/runeb/go-yrapi/yrapi
 ```
 
 ```Go
