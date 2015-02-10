@@ -1,2 +1,4 @@
 # go-yrapi
-yr.no API in Go
+
+A toy project for learning Go in a useful way
+
