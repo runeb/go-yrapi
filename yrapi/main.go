@@ -35,8 +35,8 @@ type WeatherData struct {
 
 type WeatherTime struct {
   Type string `xml:"datatype,attr"`
-  From string `xml:"from,attr"`
-  To string `xml:"to,attr"`
+  From time.Time `xml:"from,attr"`
+  To time.Time `xml:"to,attr"`
 
   Location WeatherLocation `xml:"location"`
 }
@@ -149,8 +149,24 @@ func (wt *WeatherTime) SymbolURL() (string, error) {
   return WeatherIcon(wt.Location.Symbol.Number, contentType, isNight, isPolarnight), nil
 }
 
-// API methods
+// Returns relevant WeatherTime structs for the given time
+func (wd *WeatherData) TimeForecast(time time.Time) ([]WeatherTime) {
+  var weatherTimes []WeatherTime
+  for _, weatherTime := range wd.Product.WeatherTimes {
+    if(weatherTime.Type != "forecast") {
+      continue
+    }
+    toRange := weatherTime.To.Sub(time)
+    fromRange := weatherTime.From.Sub(time)
+    if(fromRange.Hours() <= 24 && toRange.Hours() <= 1) {
+      weatherTimes = append(weatherTimes, weatherTime)
+    }
+  }
 
+  return weatherTimes
+}
+
+// API methods
 func WeatherIcon(symbol int, contentType string, isNight bool, isPolarNight bool) string {
   night := 0
   if(isNight) {
@@ -169,7 +185,6 @@ func WeatherIcon(symbol int, contentType string, isNight bool, isPolarNight bool
 func LocationforecastLTS(lat float64, lng float64) (WeatherData, error) {
   // Query the external API
   url := fmt.Sprintf("http://api.yr.no/weatherapi/locationforecastlts/1.2/?lat=%3.5f;lon=%3.5f", lat, lng)
-  fmt.Print(url)
 
   resp, err := http.Get(url)
   if err != nil {
